@@ -8,6 +8,8 @@ import {
   Delete,
 } from '@nestjs/common';
 import { PlansService } from './plans.service';
+import { CreatePlanDto } from './dto/createPlan.dto';
+import { UpdatePlanDto } from './dto/updatePlan.dto';
 
 @Controller('plans')
 export class PlansController {
@@ -19,8 +21,8 @@ export class PlansController {
   }
 
   @Post()
-  postPlan(@Body() data) {
-    return this.plansService.createPlan(data);
+  postPlan(@Body() body: CreatePlanDto) {
+    return this.plansService.createPlan(body);
   }
 
   @Get(':planId')
@@ -29,8 +31,11 @@ export class PlansController {
   }
 
   @Patch(':planId')
-  patchPlan(@Param('planId') planId: string, @Body() newPlan): string {
-    return this.plansService.updatePlan(+planId, newPlan);
+  patchPlan(
+    @Param('planId') planId: string,
+    @Body() body: UpdatePlanDto,
+  ): string {
+    return this.plansService.updatePlan(+planId, body);
   }
 
   @Delete(':planId')
@@ -39,8 +44,11 @@ export class PlansController {
   }
 
   @Post(':planId/subplans')
-  postSubplan(@Param('planId') planId: number, @Body() data): number {
-    return this.plansService.createSubplan(+planId, data);
+  postSubplan(
+    @Param('planId') planId: number,
+    @Body() body: CreatePlanDto,
+  ): number {
+    return this.plansService.createSubplan(+planId, body);
   }
 
   @Get(':planId/subplans')

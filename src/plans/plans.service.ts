@@ -1,4 +1,6 @@
 import { Body, Injectable, NotFoundException } from '@nestjs/common';
+import { CreatePlanDto } from './dto/createPlan.dto';
+import { UpdatePlanDto } from './dto/updatePlan.dto';
 
 export interface Plan {
   id: number;
@@ -11,22 +13,14 @@ export interface Plan {
   parentId: null | number;
 }
 
-export interface RequestPlan {
-  title: string;
-  description: string;
-  priority: string;
-  startDate: string;
-  endDate: string;
-}
-
 @Injectable()
 export class PlansService {
   private plans: Plan[] = [];
   private idCounter = 1;
 
-  createPlan(@Body() data: RequestPlan) {
+  createPlan(@Body() body: CreatePlanDto) {
     const plan: Plan = {
-      ...data,
+      ...body,
       id: this.idCounter++,
       success: false,
       parentId: null,
@@ -50,14 +44,14 @@ export class PlansService {
     return plan;
   }
 
-  updatePlan(planId: number, newPlan: Plan) {
+  updatePlan(planId: number, newPlan: UpdatePlanDto) {
     const plan = this.plans.find((p) => p.id === planId);
 
     if (!plan) {
       throw new NotFoundException('해당하는 id의 계획이 없습니다.');
     }
 
-    Object.assign(plan, newPlan);
+    Object.assign(plan, { ...newPlan });
 
     return 'OK';
   }
@@ -74,7 +68,7 @@ export class PlansService {
     return 'No Content';
   }
 
-  createSubplan(planId: number, data: RequestPlan) {
+  createSubplan(planId: number, data: CreatePlanDto) {
     const plan = this.plans.find((p) => p.id === planId);
 
     if (!plan) {

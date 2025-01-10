@@ -2,30 +2,31 @@ import { Body, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePlanDto } from './dto/createPlan.dto';
 import { UpdatePlanDto } from './dto/updatePlan.dto';
 import { Plan } from './entity/plan.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PlansService {
-  private plans: Plan[] = [];
-  private idCounter = 1;
-
-  createPlan(@Body() body: CreatePlanDto) {
-    const plan: Plan = {
-      ...body,
-      id: this.idCounter++,
+  constructor(
+    @InjectRepository(Plan)
+    private readonly planRepository: Repository<Plan>,
+  ) {}
+  async createPlan(@Body() createPlanDto: CreatePlanDto) {
+    const plan = await this.planRepository.save({
+      ...createPlanDto,
       success: false,
       parentId: null,
-    };
-    this.plans.push(plan);
+    });
 
     return plan.id;
   }
 
   getManyPlans() {
-    return this.plans;
+    return this.planRepository.find();
   }
 
-  getPlanById(planId: number) {
-    const plan = this.plans.find((p) => p.id === planId);
+  async getPlanById(planId: number) {
+    const plan = this.planRepository.findOne({ where: { id: planId } });
 
     if (!plan) {
       throw new NotFoundException('해당하는 id의 계획이 없습니다.');
@@ -34,52 +35,50 @@ export class PlansService {
     return plan;
   }
 
-  updatePlan(planId: number, updatePlanDto: UpdatePlanDto) {
-    const plan = this.plans.find((p) => p.id === planId);
+  async updatePlan(planId: number, updatePlanDto: UpdatePlanDto) {
+    const plan = this.planRepository.findOne({ where: { id: planId } });
 
     if (!plan) {
       throw new NotFoundException('해당하는 id의 계획이 없습니다.');
     }
 
-    Object.assign(plan, updatePlanDto);
+    this.planRepository.update({ id: planId }, updatePlanDto);
 
     return 'OK';
   }
 
-  deletePlan(planId: number) {
-    const planIndex = this.plans.findIndex((p) => p.id === planId);
-
-    if (planIndex === -1) {
-      throw new NotFoundException('해당하는 id의 계획이 없습니다.');
-    }
-
-    this.plans.splice(planIndex, 1);
-
-    return 'No Content';
-  }
-
-  createSubplan(planId: number, data: CreatePlanDto) {
-    const plan = this.plans.find((p) => p.id === planId);
+  async deletePlan(planId: number) {
+    const plan = this.planRepository.findOne({ where: { id: planId } });
 
     if (!plan) {
       throw new NotFoundException('해당하는 id의 계획이 없습니다.');
     }
 
-    const subPlan: Plan = {
-      ...data,
-      id: this.idCounter++,
+    await this.planRepository.delete(planId);
+
+    return 'No Content';
+  }
+
+  async createSubplan(planId: number, createPlanDto: CreatePlanDto) {
+    const plan = this.planRepository.findOne({ where: { id: planId } });
+
+    if (!plan) {
+      throw new NotFoundException('해당하는 id의 계획이 없습니다.');
+    }
+
+    const subPlan = await this.planRepository.save({
+      ...createPlanDto,
       success: false,
-      parentId: plan.id,
-    };
-    this.plans.push(subPlan);
+      parentId: (await plan).id,
+    });
 
     return subPlan.id;
   }
 
   getSubplansByParentId(planId: number) {
-    const plans = this.plans.filter((p) => p.parentId === planId);
+    const plans = this.planRepository.findOne({ where: { parentId: planId } });
 
-    if (plans.length === 0) {
+    if (!plans) {
       throw new NotFoundException('해당하는 id의 계획이 없습니다.');
     }
 

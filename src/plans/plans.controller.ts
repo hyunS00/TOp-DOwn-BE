@@ -31,23 +31,17 @@ export class PlansController {
   }
 
   @Patch(':planId')
-  patchPlan(
-    @Param('planId') planId: string,
-    @Body() body: UpdatePlanDto,
-  ): string {
+  patchPlan(@Param('planId') planId: string, @Body() body: UpdatePlanDto) {
     return this.plansService.updatePlan(+planId, body);
   }
 
   @Delete(':planId')
-  deletePlan(@Param('planId') planId: string): string {
+  deletePlan(@Param('planId') planId: string) {
     return this.plansService.deletePlan(+planId);
   }
 
   @Post(':planId/subplans')
-  postSubplan(
-    @Param('planId') planId: number,
-    @Body() body: CreatePlanDto,
-  ): number {
+  postSubplan(@Param('planId') planId: number, @Body() body: CreatePlanDto) {
     return this.plansService.createSubplan(+planId, body);
   }
 

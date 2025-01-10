@@ -44,14 +44,14 @@ export class PlansService {
     return plan;
   }
 
-  updatePlan(planId: number, newPlan: UpdatePlanDto) {
+  updatePlan(planId: number, updatePlanDto: UpdatePlanDto) {
     const plan = this.plans.find((p) => p.id === planId);
 
     if (!plan) {
       throw new NotFoundException('해당하는 id의 계획이 없습니다.');
     }
 
-    Object.assign(plan, { ...newPlan });
+    Object.assign(plan, updatePlanDto);
 
     return 'OK';
   }

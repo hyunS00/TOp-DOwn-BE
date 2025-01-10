@@ -1,17 +1,7 @@
 import { Body, Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePlanDto } from './dto/createPlan.dto';
 import { UpdatePlanDto } from './dto/updatePlan.dto';
-
-export interface Plan {
-  id: number;
-  title: string;
-  description: string;
-  priority: string;
-  success: boolean;
-  startDate: string;
-  endDate: string;
-  parentId: null | number;
-}
+import { Plan } from './entity/plan.entity';
 
 @Injectable()
 export class PlansService {
